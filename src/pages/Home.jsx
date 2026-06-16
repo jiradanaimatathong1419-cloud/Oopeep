@@ -8,6 +8,28 @@ import { Button } from "@/components/ui/button";
 import RestaurantSelector from "@/components/sushi/RestaurantSelector";
 import PlateButton from "@/components/sushi/PlateButton";
 import km01 from "@/assets/plates/km-01.svg";
+
+const ORDER_HISTORY_STORAGE_KEY = "oopeep_order_history";
+
+const loadLocalOrders = () => {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(window.localStorage.getItem(ORDER_HISTORY_STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+const saveLocalOrder = (order) => {
+  if (typeof window === "undefined") return;
+  try {
+    const stored = loadLocalOrders();
+    stored.unshift(order);
+    window.localStorage.setItem(ORDER_HISTORY_STORAGE_KEY, JSON.stringify(stored.slice(0, 200)));
+  } catch (err) {
+    console.error("Failed to save order locally:", err);
+  }
+};
 import km02 from "@/assets/plates/km-02.svg";
 import km03 from "@/assets/plates/km-03.svg";
 import km04 from "@/assets/plates/km-04.svg";
@@ -136,6 +158,18 @@ export default function Home() {
     const totalPlatesCount = orderedPlates.reduce((s, p) => s + orderCounts[p.id], 0);
     const today = new Date().toISOString().split("T")[0];
 
+    const orderData = {
+      id: `local-${today}-${Math.random().toString(36).substring(2, 10)}`,
+      restaurant,
+      plates_json: JSON.stringify(orderedPlates.map(p => ({ name: p.color_name, emoji: p.emoji, qty: orderCounts[p.id], price: p.price }))),
+      subtotal,
+      service_charge: serviceCharge,
+      total,
+      total_calories: totalCalories,
+      total_plates: totalPlatesCount,
+      order_date: today,
+    };
+
     if (useMockData) {
       console.info("Mock save order:", {
         restaurant,
@@ -146,6 +180,7 @@ export default function Home() {
         totalPlatesCount,
         orderedPlates,
       });
+      saveLocalOrder(orderData);
       setSaving(false);
       setSavedMsg(true);
       handleClear();
@@ -153,16 +188,13 @@ export default function Home() {
       return;
     }
 
-    await base44.entities.OrderHistory.create({
-      restaurant,
-      plates_json: JSON.stringify(orderedPlates.map(p => ({ name: p.color_name, emoji: p.emoji, qty: orderCounts[p.id], price: p.price }))),
-      subtotal,
-      service_charge: serviceCharge,
-      total,
-      total_calories: totalCalories,
-      total_plates: totalPlatesCount,
-      order_date: today
-    });
+    try {
+      await base44.entities.OrderHistory.create(orderData);
+    } catch (err) {
+      console.error("Failed to save order to backend, saving locally instead:", err);
+      saveLocalOrder(orderData);
+    }
+
     setSaving(false);
     setSavedMsg(true);
     handleClear();

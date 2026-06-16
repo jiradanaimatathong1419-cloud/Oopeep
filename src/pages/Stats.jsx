@@ -46,10 +46,33 @@ export default function Stats() {
   const [view, setView] = useState("week"); // week | month
 
   useEffect(() => {
-    base44.entities.OrderHistory.list("-order_date", 200).then(data => {
-      setOrders(data);
+    const loadOrders = async () => {
+      let data = [];
+      try {
+        data = await base44.entities.OrderHistory.list("-order_date", 200);
+      } catch (err) {
+        console.warn("Failed to load OrderHistory from backend, using local history:", err);
+      }
+
+      const localData = [];
+      try {
+        const stored = window.localStorage.getItem("oopeep_order_history");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            localData.push(...parsed);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load local order history:", err);
+      }
+
+      const merged = [...localData, ...data].sort((a, b) => b.order_date.localeCompare(a.order_date)).slice(0, 200);
+      setOrders(merged);
       setLoading(false);
-    });
+    };
+
+    loadOrders();
   }, []);
 
   // --- aggregate by week ---
