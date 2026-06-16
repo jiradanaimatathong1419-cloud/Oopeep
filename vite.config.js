@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: command === 'serve' ? '/' : '/Oopeep/',
   logLevel: 'error', // Suppress warnings, only show errors
   plugins: [
     base44({
@@ -17,4 +18,4 @@ export default defineConfig({
     }),
     react(),
   ]
-});
+}));
