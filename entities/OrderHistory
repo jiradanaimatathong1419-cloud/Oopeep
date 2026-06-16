@@ -1,0 +1,37 @@
+{
+  "name": "OrderHistory",
+  "type": "object",
+  "properties": {
+    "restaurant": {
+      "type": "string"
+    },
+    "plates_json": {
+      "type": "string"
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "service_charge": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "total_calories": {
+      "type": "number"
+    },
+    "total_plates": {
+      "type": "number"
+    },
+    "order_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "restaurant",
+    "subtotal",
+    "total",
+    "order_date"
+  ]
+}

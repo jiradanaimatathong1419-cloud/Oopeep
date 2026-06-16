@@ -1,0 +1,40 @@
+{
+  "name": "PlateType",
+  "type": "object",
+  "properties": {
+    "restaurant": {
+      "type": "string",
+      "enum": [
+        "Katsu Midori",
+        "SUSHIRO"
+      ]
+    },
+    "color_name": {
+      "type": "string"
+    },
+    "color_hex": {
+      "type": "string"
+    },
+    "emoji": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "calories": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sort_order": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "restaurant",
+    "color_name",
+    "price",
+    "sort_order"
+  ]
+}
